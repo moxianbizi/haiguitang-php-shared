@@ -1,4 +1,4 @@
-DirectoryIndex index.php
+DirectoryIndex frontend/index.v2.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On

@@ -108,3 +108,6 @@ jobs:
             config.php
             config.example.php
             frontend-static.zip
+            frontend/index.html
+            frontend/css/styles.css
+            frontend/js/app.js
