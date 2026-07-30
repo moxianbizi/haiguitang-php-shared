@@ -1,0 +1,27 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 禁止直接访问 data 目录和敏感文件
+  RewriteRule ^data/ - [R=404,L]
+  RewriteRule ^lib/ - [R=404,L]
+  RewriteRule ^config\.php$ - [R=404,L]
+  RewriteRule ^db\.php$ - [R=404,L]
+  RewriteRule ^router\.php$ - [R=404,L]
+  RewriteRule ^\.git - [R=404,L]
+  RewriteRule ^\.env - [R=404,L]
+
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# 双保险：阻止数据库与备份文件被直接访问（即便 rewrite 未命中）
+<FilesMatch "\.(db|db-wal|db-shm|sqlite|sqlite3|bak|swp|md~|env|log)$">
+  Require all denied
+</FilesMatch>
+
+# 限制 tool.php 仅本地访问
+<Files "tool.php">
+  Require ip 127.0.0.1 ::1
+</Files>
+

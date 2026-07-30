@@ -1,0 +1,16 @@
+# 数据库（运行时生成）
+data/haiguitang.db
+data/haiguitang.db-wal
+data/haiguitang.db-shm
+
+# 编辑器/系统
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志
+*.log
+logs/

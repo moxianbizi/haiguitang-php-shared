@@ -1,0 +1,7 @@
+# Apache 2.4 语法（兼容 2.2 需启用 mod_access_compat）
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Deny from all
+</IfModule>

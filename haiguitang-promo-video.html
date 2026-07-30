@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>海龟汤馆 · 宣传片</title>
+<style>
+  :root{
+    --cyan:#6ee7ff;
+    --purple:#a78bfa;
+    --pink:#f472b6;
+    --bg:#000000;
+    --glass:rgba(255,255,255,0.045);
+    --glass-border:rgba(110,231,255,0.18);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;color:#e8ecf5}
+  #stage{
+    position:fixed;inset:0;
+    background:#000000;
+  }
+  #bgimg{display:none}
+  #particles{position:absolute;inset:0;pointer-events:none}
+  .scene{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:5vh 6vw;text-align:center;opacity:0;visibility:hidden;
+    transform:translateY(24px) scale(0.98);transition:opacity .35s ease, transform .35s cubic-bezier(.2,.8,.2,1);
+  }
+  .scene.active{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+  .scene.exit{opacity:0;transform:translateY(-24px) scale(1.02)}
+
+  /* ====== Typography ====== */
+  .eyebrow{font-size:clamp(11px,1.4vw,15px);letter-spacing:.5em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px;font-weight:500;opacity:0;animation:fadeUp .4s .05s forwards}
+  .h1{font-size:clamp(42px,8vw,108px);font-weight:700;line-height:1.05;letter-spacing:.02em;
+      background:linear-gradient(120deg,#fff 0%,var(--cyan) 45%,var(--purple) 100%);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+      text-shadow:0 0 80px rgba(110,231,255,0.25);opacity:0;animation:fadeUp .45s .15s forwards}
+  .h2{font-size:clamp(30px,5vw,62px);font-weight:700;line-height:1.1;margin-bottom:14px;opacity:0;animation:fadeUp .45s .1s forwards;
+      background:linear-gradient(120deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .h3{font-size:clamp(22px,3vw,34px);font-weight:600;margin-bottom:10px;color:#fff;opacity:0;animation:fadeUp .45s .1s forwards}
+  .lead{font-size:clamp(15px,1.9vw,22px);line-height:1.7;color:#b9c4d6;max-width:760px;opacity:0;animation:fadeUp .45s .2s forwards}
+  .small{font-size:clamp(12px,1.3vw,15px);color:#8190a6;letter-spacing:.06em}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 30px rgba(110,231,255,.25)}50%{box-shadow:0 0 60px rgba(110,231,255,.55)}}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+  /* ====== Glass cards ====== */
+  .glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:22px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+
+  /* ====== Scene 0 : Intro ====== */
+  #scene-0 .logo-ring{width:clamp(120px,16vw,200px);height:clamp(120px,16vw,200px);border-radius:50%;
+    border:2px solid rgba(110,231,255,.35);display:flex;align-items:center;justify-content:center;margin-bottom:34px;
+    position:relative;animation:pulseGlow 3s ease-in-out infinite;opacity:0;animation:fadeUp 1s .1s forwards,pulseGlow 3s 1s ease-in-out infinite}
+  #scene-0 .logo-ring::before{content:"";position:absolute;inset:-14px;border-radius:50%;border:1px dashed rgba(167,139,250,.4);animation:spin 22s linear infinite}
+  #scene-0 .logo-ring::after{content:"";position:absolute;inset:-30px;border-radius:50%;border:1px solid rgba(110,231,255,.12);animation:spin 40s linear infinite reverse}
+  #scene-0 .logo-emoji{font-size:clamp(50px,7vw,86px)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .tagline{margin-top:24px;font-size:clamp(14px,1.6vw,18px);color:#9fb0c8;letter-spacing:.3em;opacity:0;animation:fadeUp 1s .9s forwards}
+
+  /* ====== Scene 1 : What is ====== */
+  .answer-row{display:flex;gap:clamp(14px,3vw,42px);margin-top:46px;flex-wrap:wrap;justify-content:center}
+  .answer-chip{padding:18px 38px;border-radius:16px;font-size:clamp(22px,3vw,40px);font-weight:700;opacity:0;
+    background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(10px);animation:popIn .6s forwards}
+  .answer-chip.yes{color:#7CFFB2;border-color:rgba(124,255,178,.45);box-shadow:0 0 30px rgba(124,255,178,.2)}
+  .answer-chip.no{color:#ff8a8a;border-color:rgba(255,138,138,.45);box-shadow:0 0 30px rgba(255,138,138,.2)}
+  .answer-chip.irr{color:var(--purple);border-color:rgba(167,139,250,.45);box-shadow:0 0 30px rgba(167,139,250,.2)}
+  @keyframes popIn{0%{opacity:0;transform:scale(.5) translateY(20px)}60%{transform:scale(1.08)}100%{opacity:1;transform:scale(1) translateY(0)}}
+
+  /* ====== Scene 2 : Library ====== */
+  .stats-line{display:flex;gap:clamp(20px,4vw,60px);margin:30px 0 38px;flex-wrap:wrap;justify-content:center}
+  .stat{text-align:center}
+  .stat .num{font-size:clamp(38px,5vw,64px);font-weight:700;
+    background:linear-gradient(120deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat .lbl{font-size:clamp(12px,1.3vw,15px);color:#9fb0c8;margin-top:6px;letter-spacing:.1em}
+  .series-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:880px;width:100%}
+  .series-card{padding:16px 18px;border-radius:14px;opacity:0;animation:fadeUp .6s forwards;
+    background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(10px);text-align:left}
+  .series-card .s-name{font-size:clamp(13px,1.5vw,17px);font-weight:600;color:#fff;margin-bottom:4px}
+  .series-card .s-cnt{font-size:clamp(11px,1.2vw,13px);color:var(--cyan)}
+  .series-card .s-desc{font-size:clamp(10px,1.1vw,12px);color:#8190a6;margin-top:6px;line-height:1.5}
+
+  /* ====== Scene 3 : AI single player ====== */
+  .chat-demo{max-width:560px;width:100%;margin-top:34px;display:flex;flex-direction:column;gap:12px}
+  .bubble{padding:13px 18px;border-radius:16px;max-width:80%;font-size:clamp(13px,1.5vw,16px);line-height:1.5;opacity:0;animation:fadeUp .5s forwards}
+  .bubble.me{align-self:flex-end;background:linear-gradient(120deg,rgba(110,231,255,.22),rgba(167,139,250,.22));border:1px solid rgba(110,231,255,.35);color:#eaf6ff}
+  .bubble.ai{align-self:flex-start;background:var(--glass);border:1px solid var(--glass-border);color:#dfe7f3}
+  .bubble.ai .tag{display:inline-block;font-size:10px;color:var(--cyan);letter-spacing:.15em;margin-bottom:5px}
+  .ai-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:30px;font-size:13px;color:var(--cyan);
+    background:rgba(110,231,255,.08);border:1px solid rgba(110,231,255,.3);margin-top:26px;opacity:0;animation:fadeUp .5s 1.5s forwards}
+  .ai-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation:blink 1.4s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* ====== Scene 4 : Multiplayer ====== */
+  .room-flow{display:flex;align-items:center;gap:clamp(10px,2vw,26px);margin-top:40px;flex-wrap:wrap;justify-content:center}
+  .flow-step{padding:18px 24px;border-radius:14px;text-align:center;min-width:130px;opacity:0;animation:fadeUp .6s forwards;
+    background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(10px)}
+  .flow-step .ico{font-size:30px;margin-bottom:8px}
+  .flow-step .t{font-size:clamp(12px,1.3vw,15px);color:#dfe7f3;font-weight:500}
+  .flow-arrow{font-size:26px;color:var(--cyan);opacity:0;animation:fadeUp .5s forwards}
+  .room-code{margin-top:34px;font-family:'Courier New',monospace;font-size:clamp(28px,4vw,46px);font-weight:700;letter-spacing:.4em;
+    color:#fff;padding:14px 30px;border-radius:14px;background:rgba(110,231,255,.08);border:1px dashed rgba(110,231,255,.5);
+    opacity:0;animation:fadeUp .5s 1.3s forwards;text-shadow:0 0 30px rgba(110,231,255,.4)}
+
+  /* ====== Scene 5 : submit & download ====== */
+  .feat-pair{display:flex;gap:24px;margin-top:40px;flex-wrap:wrap;justify-content:center}
+  .feat-card{flex:1;min-width:260px;max-width:340px;padding:28px;border-radius:20px;opacity:0;animation:fadeUp .7s forwards;
+    background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(12px)}
+  .feat-card .ico{font-size:38px;margin-bottom:14px;display:block}
+  .feat-card .ft{font-size:clamp(18px,2.2vw,24px);font-weight:600;margin-bottom:8px;color:#fff}
+  .feat-card .fd{font-size:clamp(12px,1.3vw,14px);color:#9fb0c8;line-height:1.6}
+
+  /* ====== Scene 6 : admin ====== */
+  .admin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:900px;width:100%;margin-top:36px}
+  .admin-tile{padding:16px 12px;border-radius:14px;text-align:center;opacity:0;animation:fadeUp .5s forwards;
+    background:var(--glass);border:1px solid var(--glass-border)}
+  .admin-tile .a-ico{font-size:24px;margin-bottom:6px}
+  .admin-tile .a-t{font-size:clamp(11px,1.2vw,13px);color:#cfd8e6}
+
+  /* ====== Scene 7 : design & self-host ====== */
+  .design-row{display:flex;gap:30px;align-items:center;margin-top:38px;flex-wrap:wrap;justify-content:center;max-width:900px}
+  .swatches{display:flex;gap:10px}
+  .swatch{width:48px;height:48px;border-radius:12px;box-shadow:0 0 20px currentColor}
+  .design-points{text-align:left;display:flex;flex-direction:column;gap:10px}
+  .design-points div{font-size:clamp(13px,1.5vw,16px);color:#cfd8e6;display:flex;align-items:center;gap:10px;opacity:0;animation:fadeUp .6s forwards}
+  .design-points div::before{content:"◆";color:var(--cyan)}
+
+  /* ====== Scene 8 : tech highlights ====== */
+  .highlights{display:flex;flex-direction:column;gap:14px;margin-top:36px;max-width:720px;width:100%}
+  .hl{display:flex;align-items:center;gap:18px;padding:16px 22px;border-radius:14px;opacity:0;animation:fadeUp .6s forwards;
+    background:var(--glass);border:1px solid var(--glass-border);text-align:left}
+  .hl .hl-ico{font-size:26px;flex-shrink:0}
+  .hl .hl-t{font-size:clamp(14px,1.7vw,18px);font-weight:600;color:#fff}
+  .hl .hl-d{font-size:clamp(11px,1.2vw,13px);color:#9fb0c8;margin-top:2px}
+
+  /* ====== Scene 9 : outro ====== */
+  #scene-9 .gh-link{margin-top:36px;font-family:'Courier New',monospace;font-size:clamp(15px,1.8vw,21px);color:var(--cyan);
+    padding:14px 30px;border-radius:12px;background:rgba(110,231,255,.06);border:1px solid rgba(110,231,255,.3);
+    opacity:0;animation:fadeUp .8s .6s forwards;text-shadow:0 0 20px rgba(110,231,255,.4)}
+  #scene-9 .cta{margin-top:30px;font-size:clamp(18px,2.4vw,28px);font-weight:600;color:#fff;opacity:0;animation:fadeUp .8s 1s forwards}
+  #scene-9 .repo-info{margin-top:14px;font-size:clamp(11px,1.2vw,13px);color:#8190a6;opacity:0;animation:fadeUp .8s 1.3s forwards}
+
+  /* ====== Controls ====== */
+  #controls{position:fixed;bottom:0;left:0;right:0;padding:18px 26px;z-index:50;
+    background:linear-gradient(to top,rgba(6,7,13,.95),transparent)}
+  #progress-track{height:4px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;cursor:pointer}
+  #progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:4px;transition:width .2s linear;
+    box-shadow:0 0 12px rgba(110,231,255,.6)}
+  .ctrl-row{display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:18px}
+  .btn{background:rgba(110,231,255,.12);border:1px solid rgba(110,231,255,.35);color:var(--cyan);padding:8px 18px;border-radius:8px;
+    cursor:pointer;font-size:13px;font-weight:500;transition:all .25s;backdrop-filter:blur(8px);font-family:inherit}
+  .btn:hover{background:rgba(110,231,255,.22);box-shadow:0 0 20px rgba(110,231,255,.3)}
+  .btn.off{opacity:.4;color:#8190a6;border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.03)}
+  .btn .vol{width:60px;height:3px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.15);border-radius:3px;outline:none;cursor:pointer}
+  .btn .vol::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+  .btn .vol::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--cyan);border:none}
+  .timecode{font-family:'Courier New',monospace;font-size:12px;color:#9fb0c8;letter-spacing:.1em}
+  .scene-dots{display:flex;gap:6px}
+  .scene-dots .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18);transition:all .3s}
+  .scene-dots .dot.active{background:var(--cyan);box-shadow:0 0 8px var(--cyan);transform:scale(1.4)}
+
+  /* ====== Start overlay ====== */
+  #start-overlay{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(circle at center,rgba(110,231,255,.12),rgba(6,7,13,.98));cursor:pointer;text-align:center}
+  #start-overlay .play-btn{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));
+    display:flex;align-items:center;justify-content:center;margin-bottom:24px;animation:pulseGlow 2s infinite;box-shadow:0 0 50px rgba(110,231,255,.5)}
+  #start-overlay .play-btn::after{content:"";border-style:solid;border-width:18px 0 18px 28px;border-color:transparent transparent transparent #06070d;margin-left:6px}
+  #start-overlay h2{font-size:clamp(28px,4vw,48px);font-weight:700;margin-bottom:10px;
+    background:linear-gradient(120deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  #start-overlay p{color:#9fb0c8;font-size:clamp(13px,1.5vw,16px);letter-spacing:.1em}
+
+  /* replay hint */
+  #replay-hint{position:fixed;top:20px;right:20px;z-index:40;font-size:11px;color:#8190a6;background:rgba(255,255,255,.04);
+    padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.08);opacity:0;transition:opacity .5s}
+
+  /* UI hidden: no controls / progress / overlay shown in video */
+  #controls, #replay-hint { display:none !important; }
+
+  @media (max-width:720px){
+    .series-grid{grid-template-columns:repeat(2,1fr)}
+    .admin-grid{grid-template-columns:repeat(2,1fr)}
+    .feat-pair{flex-direction:column;align-items:stretch}
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bgimg"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- Scene 0 : Intro -->
+  <section class="scene" id="scene-0" data-bg="0">
+    <div class="logo-ring"><div class="logo-emoji">🐢</div></div>
+    <div class="eyebrow">HAI GUITANG GUAN</div>
+    <div class="h1">海龟汤馆</div>
+    <div class="tagline">悬疑推理 · 智趣交锋 · 自托管</div>
+  </section>
+
+  <!-- Scene 1 : What is -->
+  <section class="scene" id="scene-1" data-bg="0">
+    <div class="eyebrow">WHAT IS IT</div>
+    <div class="h2">一碗汤，一个谜</div>
+    <div class="lead">海龟汤是风靡全球的情境猜谜游戏。主持人知道真相，玩家只能用<b style="color:#fff">「是 / 否 / 无关」</b>提问，一步步逼近汤底。</div>
+    <div class="answer-row">
+      <div class="answer-chip yes" style="animation-delay:.4s">是</div>
+      <div class="answer-chip no" style="animation-delay:.6s">否</div>
+      <div class="answer-chip irr" style="animation-delay:.8s">无关</div>
+    </div>
+  </section>
+
+  <!-- Scene 2 : Library -->
+  <section class="scene" id="scene-2" data-bg="2">
+    <div class="eyebrow">THE LIBRARY</div>
+    <div class="h2">海量题库 开箱即玩</div>
+    <div class="stats-line">
+      <div class="stat"><div class="num" data-count="146">0</div><div class="lbl">碗精选汤</div></div>
+      <div class="stat"><div class="num" data-count="6">0</div><div class="lbl">大系列</div></div>
+      <div class="stat"><div class="num" data-count="100" data-suffix="%">0</div><div class="lbl">免费开源</div></div>
+    </div>
+    <div class="series-grid">
+      <div class="series-card" style="animation-delay:.2s"><div class="s-name">第一季 · 经典推理</div><div class="s-cnt">23 碗</div><div class="s-desc">入门必刷，逻辑严密</div></div>
+      <div class="series-card" style="animation-delay:.3s"><div class="s-name">第二季 · 进阶烧脑</div><div class="s-cnt">37 碗</div><div class="s-desc">情节反转，细思极恐</div></div>
+      <div class="series-card" style="animation-delay:.4s"><div class="s-name">第三季 · 高难度</div><div class="s-cnt">68 碗</div><div class="s-desc">硬核推理，挑战极限</div></div>
+      <div class="series-card" style="animation-delay:.5s"><div class="s-name">第四季</div><div class="s-cnt">1 碗</div><div class="s-desc">持续更新中</div></div>
+      <div class="series-card" style="animation-delay:.6s"><div class="s-name">灵之残响系列</div><div class="s-cnt">12 碗</div><div class="s-desc">幻灵视角 · 角色扮演</div></div>
+      <div class="series-card" style="animation-delay:.7s"><div class="s-name">规则怪谈系列</div><div class="s-cnt">5 碗</div><div class="s-desc">红字规则 · 反话陷阱</div></div>
+    </div>
+  </section>
+
+  <!-- Scene 3 : AI single player -->
+  <section class="scene" id="scene-3" data-bg="1">
+    <div class="eyebrow">SINGLE PLAYER</div>
+    <div class="h2">AI 主持人 一个人也能玩</div>
+    <div class="lead">选一碗汤，向 AI 提问。DeepSeek 担任公平裁判，严格遵守主持人手册，绝不剧透。</div>
+    <div class="chat-demo">
+      <div class="bubble me" style="animation-delay:.3s">这个人是被别人杀死的吗？</div>
+      <div class="bubble ai" style="animation-delay:.6s"><span class="tag">AI 主持人</span>否。</div>
+      <div class="bubble me" style="animation-delay:.9s">和「风」有关？</div>
+      <div class="bubble ai" style="animation-delay:1.2s"><span class="tag">AI 主持人</span>恭喜你，猜中了 🎉</div>
+    </div>
+    <div class="ai-badge"><span class="dot"></span>用户自带 DeepSeek API Key · 站长零成本</div>
+  </section>
+
+  <!-- Scene 4 : Multiplayer -->
+  <section class="scene" id="scene-4" data-bg="1">
+    <div class="eyebrow">MULTIPLAYER</div>
+    <div class="h2">多人房间 呼朋唤友</div>
+    <div class="lead">创建房间，分享 6 位邀请码，好友凭码秒进。实时聊天，AI 主持人随时在场。</div>
+    <div class="room-flow">
+      <div class="flow-step" style="animation-delay:.2s"><div class="ico">🎲</div><div class="t">创建房间</div></div>
+      <div class="flow-arrow" style="animation-delay:.35s">→</div>
+      <div class="flow-step" style="animation-delay:.5s"><div class="ico">🔗</div><div class="t">分享邀请码</div></div>
+      <div class="flow-arrow" style="animation-delay:.65s">→</div>
+      <div class="flow-step" style="animation-delay:.8s"><div class="ico">💬</div><div class="t">实时开聊</div></div>
+      <div class="flow-arrow" style="animation-delay:.95s">→</div>
+      <div class="flow-step" style="animation-delay:1.1s"><div class="ico">🤖</div><div class="t">AI 主持</div></div>
+    </div>
+    <div class="room-code">HGT · 7K9M2X</div>
+  </section>
+
+  <!-- Scene 5 : create & export -->
+  <section class="scene" id="scene-5" data-bg="2">
+    <div class="eyebrow">CREATE &amp; SHARE</div>
+    <div class="h2">创作你的专属汤</div>
+    <div class="lead">写一个汤面、埋一个汤底，加入你的脑洞到题库。还能一键导出，分享给朋友慢慢玩。</div>
+    <div class="feat-pair">
+      <div class="feat-card" style="animation-delay:.25s">
+        <span class="ico">✍️</span>
+        <div class="ft">在线创作</div>
+        <div class="fd">填写汤面、汤底与主持人手册，支持富文本排版，规则怪谈红字标记自动渲染。</div>
+      </div>
+      <div class="feat-card" style="animation-delay:.5s">
+        <span class="ico">💾</span>
+        <div class="ft">一键导出</div>
+        <div class="fd">把汤导出为 Markdown 文件，发给朋友离线游玩，手机电脑都能打开。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scene 6 : design -->
+  <section class="scene" id="scene-6" data-bg="0">
+    <div class="eyebrow">EXPERIENCE</div>
+    <div class="h2">沉浸式赛博美学</div>
+    <div class="design-row">
+      <div class="swatches">
+        <div class="swatch" style="background:#6ee7ff;color:#6ee7ff"></div>
+        <div class="swatch" style="background:#a78bfa;color:#a78bfa"></div>
+        <div class="swatch" style="background:#f472b6;color:#f472b6"></div>
+        <div class="swatch" style="background:#0b0d12;color:#0b0d12;border:1px solid rgba(255,255,255,.15)"></div>
+      </div>
+      <div class="design-points">
+        <div style="animation-delay:.4s">深色赛博风 · 沉浸氛围</div>
+        <div style="animation-delay:.6s">毛玻璃卡片 · 流光质感</div>
+        <div style="animation-delay:.8s">径向光晕 · 浮动动效</div>
+        <div style="animation-delay:1s">手机电脑 · 随时畅玩</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scene 7 : highlights -->
+  <section class="scene" id="scene-7" data-bg="1">
+    <div class="eyebrow">WHY YOU'LL LOVE IT</div>
+    <div class="h2">为玩家而生</div>
+    <div class="highlights">
+      <div class="hl" style="animation-delay:.25s"><div class="hl-ico">🧩</div><div><div class="hl-t">146 碗精选汤，六大系列任你刷</div><div class="hl-d">经典推理、灵之残响、规则怪谈，烧脑不停</div></div></div>
+      <div class="hl" style="animation-delay:.45s"><div class="hl-ico">🤖</div><div><div class="hl-t">AI 主持人随时陪玩</div><div class="hl-d">一个人也能开局，公平裁判绝不剧透</div></div></div>
+      <div class="hl" style="animation-delay:.65s"><div class="hl-ico">🎮</div><div><div class="hl-t">多人房间，派对聚会神器</div><div class="hl-d">邀请码秒进，实时聊天，边聊边推理</div></div></div>
+      <div class="hl" style="animation-delay:.85s"><div class="hl-ico">✍️</div><div><div class="hl-t">题库持续更新</div><div class="hl-d">玩家共创投稿，新鲜汤源源不断</div></div></div>
+      <div class="hl" style="animation-delay:1.05s"><div class="hl-ico">💎</div><div><div class="hl-t">免费开源 · 完全免费畅玩</div><div class="hl-d">沉浸式赛博界面，越玩越上瘾</div></div></div>
+    </div>
+  </section>
+
+  <!-- Scene 8 : outro -->
+  <section class="scene" id="scene-8" data-bg="0">
+    <div class="logo-ring" style="width:clamp(90px,12vw,140px);height:clamp(90px,12vw,140px);margin-bottom:24px;animation:fadeUp 1s .1s forwards,pulseGlow 3s 1s infinite">
+      <div class="logo-emoji" style="font-size:clamp(40px,5.5vw,64px)">🐢</div>
+    </div>
+    <div class="eyebrow" style="animation-delay:.3s">OPEN SOURCE · MIT</div>
+    <div class="h2" style="animation-delay:.45s">开启你的推理之夜</div>
+    <div class="gh-link">github.com/moxianbizi/haiguitang-php</div>
+    <div class="cta">来一局，开始你的推理之夜</div>
+    <div class="repo-info">免费开源 · 即开即玩</div>
+  </section>
+</div>
+
+<!-- Controls -->
+<div id="controls">
+  <div id="progress-track"><div id="progress-bar"></div></div>
+  <div class="ctrl-row">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <button class="btn" id="play-btn">⏸ 暂停</button>
+      <button class="btn" id="replay-btn">↻ 重播</button>
+      <button class="btn" id="music-btn">🎵 音乐</button>
+      <button class="btn" id="voice-btn">🎙 配音</button>
+      <span class="timecode" id="timecode">00:00 / 00:18</span>
+    </div>
+    <div class="scene-dots" id="scene-dots"></div>
+  </div>
+</div>
+
+<div id="replay-hint">视频已播放完毕 · 点击重播</div>
+
+<!-- Start overlay -->
+<div id="start-overlay">
+  <div class="play-btn"></div>
+  <h2>海龟汤馆 · 宣传片</h2>
+  <p>点击播放 · 约 18 秒 · 背景音乐</p>
+</div>
+
+<script>
+/* ====== Background images (text-to-image) ====== */
+const BG_IMAGES = {
+  0: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=" + encodeURIComponent("Dark mysterious cinematic background deep blue and purple tones swirling fog ancient chinese mystery atmosphere noir detective puzzle turtle silhouette in mist 4k cinematic") + "&image_size=landscape_16_9",
+  1: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=" + encodeURIComponent("Abstract cyberpunk neon glow background dark navy cyan purple light rays futuristic minimal soft bokeh particles depth") + "&image_size=landscape_16_9",
+  2: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=" + encodeURIComponent("Dark mystical archive library floating glowing puzzle cards mystery collection blue purple ambient cinematic depth") + "&image_size=landscape_16_9"
+};
+
+/* preload */
+Object.values(BG_IMAGES).forEach(src=>{const i=new Image();i.src=src;});
+
+/* ====== Timeline ======
+   Each scene: ~2s each. Total ~18s */
+const SCENES = [
+  {id:'scene-0', start:0,   dur:2},
+  {id:'scene-1', start:2,   dur:2},
+  {id:'scene-2', start:4,   dur:2},
+  {id:'scene-3', start:6,   dur:2},
+  {id:'scene-4', start:8,   dur:2},
+  {id:'scene-5', start:10,  dur:2},
+  {id:'scene-6', start:12,  dur:2},
+  {id:'scene-7', start:14,  dur:2},
+  {id:'scene-8', start:16,  dur:2},
+];
+const TOTAL = SCENES.reduce((a,s)=>Math.max(a,s.start+s.dur),0);
+
+/* ====== DOM ====== */
+const stage = document.getElementById('stage');
+const bgimg = document.getElementById('bgimg');
+const progressBar = document.getElementById('progress-bar');
+const progressTrack = document.getElementById('progress-track');
+const timecode = document.getElementById('timecode');
+const playBtn = document.getElementById('play-btn');
+const replayBtn = document.getElementById('replay-btn');
+const startOverlay = document.getElementById('start-overlay');
+const replayHint = document.getElementById('replay-hint');
+const sceneDotsWrap = document.getElementById('scene-dots');
+const sceneEls = SCENES.map(s=>document.getElementById(s.id));
+
+/* dots */
+SCENES.forEach((s,i)=>{const d=document.createElement('div');d.className='dot';sceneDotsWrap.appendChild(d);});
+const dots = sceneDotsWrap.querySelectorAll('.dot');
+
+/* ====== State ====== */
+let playing = false;
+let started = false;
+let startTime = 0;       // performance.now() at play start
+let pausedAt = 0;        // seconds elapsed when paused
+let rafId = null;
+let currentSceneIdx = -1;
+let currentBg = -1;
+
+function fmt(t){t=Math.max(0,Math.round(t));const m=String(Math.floor(t/60)).padStart(2,'0');const s=String(t%60).padStart(2,'0');return m+':'+s;}
+
+function setBg(idx){
+  if(idx===currentBg) return;
+  currentBg = idx;
+  bgimg.style.opacity = 0;
+  setTimeout(()=>{
+    bgimg.style.backgroundImage = `url("${BG_IMAGES[idx]}")`;
+    bgimg.style.opacity = 1;
+  }, 250);
+}
+
+function activateScene(idx){
+  if(idx===currentSceneIdx) return;
+  // exit previous
+  if(currentSceneIdx>=0){
+    const prev = sceneEls[currentSceneIdx];
+    prev.classList.remove('active');
+    prev.classList.add('exit');
+    setTimeout(()=>prev.classList.remove('exit'), 350);
+  }
+  currentSceneIdx = idx;
+  if(idx>=0 && idx<sceneEls.length){
+    // restart inner animations by re-adding class
+    const el = sceneEls[idx];
+    el.classList.remove('active');
+    void el.offsetWidth; // reflow to restart CSS animations
+    el.classList.add('active');
+    // set background
+    const bg = parseInt(el.dataset.bg||'0',10);
+    setBg(bg);
+    // animate counters
+    el.querySelectorAll('[data-count]').forEach(node=>{
+      const target = parseInt(node.dataset.count,10);
+      const suffix = node.dataset.suffix||'';
+      const dur = 1200;
+      const t0 = performance.now();
+      function step(now){
+        const p = Math.min(1,(now-t0)/dur);
+        const eased = 1-Math.pow(1-p,3);
+        node.textContent = Math.round(target*eased)+suffix;
+        if(p<1) requestAnimationFrame(step);
+        else node.textContent = target+suffix;
+      }
+      requestAnimationFrame(step);
+    });
+  }
+  // dots
+  dots.forEach((d,i)=>d.classList.toggle('active', i===idx));
+}
+
+function tick(now){
+  if(!playing) return;
+  const elapsed = (now - startTime)/1000 + pausedAt;
+  if(elapsed >= TOTAL){
+    progressBar.style.width = '100%';
+    timecode.textContent = fmt(TOTAL)+' / '+fmt(TOTAL);
+    finish();
+    return;
+  }
+  // find scene
+  let idx = -1;
+  for(let i=0;i<SCENES.length;i++){
+    if(elapsed >= SCENES[i].start && elapsed < SCENES[i].start+SCENES[i].dur){ idx=i; break; }
+  }
+  if(idx===-1 && elapsed>=TOTAL) idx=SCENES.length-1;
+  activateScene(idx);
+  progressBar.style.width = (elapsed/TOTAL*100)+'%';
+  timecode.textContent = fmt(elapsed)+' / '+fmt(TOTAL);
+  rafId = requestAnimationFrame(tick);
+}
+
+function play(){
+  if(started && (pausedAt>=TOTAL || pausedAt===0 && currentSceneIdx===SCENES.length-1)){
+    // restart
+    restart();
+    return;
+  }
+  playing = true;
+  started = true;
+  startTime = performance.now();
+  replayHint.style.opacity = 0;
+  // audio: start/resume music on play (user gesture)
+  if(musicOn){
+    if(!audioCtx) initMusic();
+    else if(audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  rafId = requestAnimationFrame(tick);
+}
+
+function pause(){
+  if(!playing) return;
+  playing = false;
+  pausedAt = pausedAt + (performance.now()-startTime)/1000;
+  cancelAnimationFrame(rafId);
+  if(audioCtx && audioCtx.state === 'running') audioCtx.suspend();
+}
+
+function restart(){
+  playing = false;
+  cancelAnimationFrame(rafId);
+  pausedAt = 0;
+  currentSceneIdx = -1;
+  sceneEls.forEach(el=>el.classList.remove('active','exit'));
+  if(musicOn){
+    if(!audioCtx) initMusic();
+    else if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  play();
+}
+
+function finish(){
+  playing = false;
+  cancelAnimationFrame(rafId);
+  pausedAt = TOTAL;
+}
+
+/* ====== Controls ====== */
+playBtn.addEventListener('click', ()=>{
+  if(!started){ play(); }
+  else if(playing){ pause(); }
+  else { 
+    if(pausedAt>=TOTAL){ restart(); }
+    else play();
+  }
+});
+replayBtn.addEventListener('click', restart);
+startOverlay.addEventListener('click', ()=>{
+  startOverlay.style.display='none';
+  play();
+});
+progressTrack.addEventListener('click', e=>{
+  const rect = progressTrack.getBoundingClientRect();
+  const ratio = (e.clientX-rect.left)/rect.width;
+  const target = ratio*TOTAL;
+  pausedAt = target;
+  playing = false;
+  cancelAnimationFrame(rafId);
+  startTime = performance.now();
+  // jump
+  let idx=-1;
+  for(let i=0;i<SCENES.length;i++){ if(target>=SCENES[i].start && target<SCENES[i].start+SCENES[i].dur){idx=i;break;} }
+  if(idx===-1) idx = target>=TOTAL?SCENES.length-1:0;
+  activateScene(idx);
+  progressBar.style.width=(target/TOTAL*100)+'%';
+  timecode.textContent=fmt(target)+' / '+fmt(TOTAL);
+  if(!started){ started=true; }
+});
+
+/* ====== Particle background ====== */
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let W,H,particles;
+function resize(){
+  W = canvas.width = window.innerWidth*devicePixelRatio;
+  H = canvas.height = window.innerHeight*devicePixelRatio;
+  canvas.style.width = window.innerWidth+'px';
+  canvas.style.height = window.innerHeight+'px';
+  const count = Math.min(70, Math.floor(window.innerWidth/22));
+  particles = Array.from({length:count}, ()=>({
+    x:Math.random()*W, y:Math.random()*H,
+    r:(Math.random()*1.6+0.4)*devicePixelRatio,
+    vx:(Math.random()-0.5)*0.25*devicePixelRatio,
+    vy:(Math.random()-0.5)*0.25*devicePixelRatio,
+    a:Math.random()*0.5+0.1,
+    hue: Math.random()<0.5?195:260
+  }));
+}
+resize();
+window.addEventListener('resize', resize);
+
+function drawParticles(){
+  ctx.clearRect(0,0,W,H);
+  for(const p of particles){
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = `hsla(${p.hue},90%,70%,${p.a})`;
+    ctx.shadowBlur = 8*devicePixelRatio;
+    ctx.shadowColor = `hsla(${p.hue},90%,70%,${p.a})`;
+    ctx.fill();
+  }
+  ctx.shadowBlur=0;
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+/* keyboard */
+window.addEventListener('keydown', e=>{
+  if(e.code==='Space'){ e.preventDefault(); playBtn.click(); }
+  if(e.code==='KeyR'){ restart(); }
+  if(e.code==='KeyM'){ musicBtn.click(); }
+});
+
+/* ============================================================
+   AUDIO ENGINE : Background music (Web Audio synth)
+   ============================================================ */
+
+/* --- Music state --- */
+let musicOn = true;
+let audioCtx = null;
+let musicNodes = null;
+
+const musicBtn = document.getElementById('music-btn');
+
+/* --- Background music: ambient synth pad with chord progression --- */
+function initMusic(){
+  if(audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Master chain: gain -> lowpass -> delay (echo) -> destination
+  const master = audioCtx.createGain();
+  master.gain.value = 0.16;
+  const lp = audioCtx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 1800;
+  lp.Q.value = 0.6;
+
+  // simple feedback delay for space
+  const delay = audioCtx.createDelay(2.0);
+  delay.delayTime.value = 0.55;
+  const fb = audioCtx.createGain();
+  fb.gain.value = 0.32;
+  const wet = audioCtx.createGain();
+  wet.gain.value = 0.35;
+
+  master.connect(lp);
+  lp.connect(audioCtx.destination);
+  lp.connect(delay);
+  delay.connect(fb);
+  fb.connect(delay);
+  delay.connect(wet);
+  wet.connect(audioCtx.destination);
+
+  // Chord progression (A minor feel): Am - F - C - G  (4 chords, 8s each = 32s loop)
+  const CHORDS = [
+    [220.00, 261.63, 329.63],   // Am  A3 C4 E4
+    [174.61, 220.00, 261.63],   // F   F3 A3 C4
+    [130.81, 164.81, 196.00],   // C   C3 E3 G3
+    [196.00, 246.94, 293.66],   // G   G3 B3 D4
+  ];
+  const CHORD_DUR = 8; // seconds per chord
+
+  // Pad: 3 detuned sawtooth oscillators per note, slow attack
+  const padGain = audioCtx.createGain();
+  padGain.gain.value = 0.5;
+  padGain.connect(master);
+
+  let chordIdx = 0;
+  let padOscs = [];
+
+  function playChord(freqs, when){
+    // stop previous
+    padOscs.forEach(o=>{ try{o.stop(when);}catch(e){} });
+    padOscs = [];
+    freqs.forEach((f, i)=>{
+      [-7, 0, 7].forEach(cents=>{
+        const osc = audioCtx.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.value = f;
+        osc.detune.value = cents;
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(0, when);
+        g.gain.linearRampToValueAtTime(0.045, when + 2.2);   // slow attack
+        g.gain.linearRampToValueAtTime(0.03, when + CHORD_DUR - 1.5);
+        g.gain.linearRampToValueAtTime(0, when + CHORD_DUR - 0.1);
+        osc.connect(g); g.connect(padGain);
+        osc.start(when);
+        padOscs.push(osc);
+      });
+    });
+  }
+
+  // Soft arpeggio bell on top
+  const arpGain = audioCtx.createGain();
+  arpGain.gain.value = 0.22;
+  arpGain.connect(master);
+
+  function playArp(freqs, when){
+    const seq = [freqs[0], freqs[1], freqs[2], freqs[1], freqs[0]*2, freqs[2]*2, freqs[1], freqs[0]*2];
+    seq.forEach((f, i)=>{
+      const t = when + i * (CHORD_DUR/seq.length);
+      const osc = audioCtx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.value = f;
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.05, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0008, t + 1.4);
+      osc.connect(g); g.connect(arpGain);
+      osc.start(t);
+      osc.stop(t + 1.6);
+    });
+  }
+
+  // schedule loop
+  function schedule(){
+    const now = audioCtx.currentTime;
+    const f = CHORDS[chordIdx % CHORDS.length];
+    playChord(f, now + 0.05);
+    playArp(f, now + 0.05);
+    chordIdx++;
+    musicNodes = { timer: setTimeout(schedule, CHORD_DUR * 1000) };
+  }
+  schedule();
+  musicNodes = musicNodes || {};
+}
+
+function startMusic(){
+  if(!audioCtx) initMusic();
+  else if(audioCtx.state === 'suspended') audioCtx.resume();
+  if(musicNodes && musicNodes.master){
+    musicNodes.master.gain.setTargetAtTime(0.16, audioCtx.currentTime, 0.3);
+  }
+}
+
+function stopMusic(){
+  if(audioCtx && audioCtx.state === 'running'){
+    // suspend is cleanest pause
+    audioCtx.suspend();
+  }
+}
+
+/* --- Button handlers --- */
+musicBtn.addEventListener('click', ()=>{
+  musicOn = !musicOn;
+  musicBtn.classList.toggle('off', !musicOn);
+  musicBtn.textContent = musicOn ? '🎵 音乐' : '🎵 静音';
+  if(musicOn){
+    if(!audioCtx) initMusic();
+    else audioCtx.resume();
+  } else {
+    if(audioCtx) audioCtx.suspend();
+  }
+});
+</script>
+</body>
+</html>
