@@ -97,6 +97,7 @@ jobs:
           server-dir: ${{ secrets.FTP_REMOTE_DIR }}
           protocol: ftp
           security: loose
+          state-name: lib/.ftp-deploy-sync-state.json
           exclude: |
             **/.git*/**
             **/.github/**
