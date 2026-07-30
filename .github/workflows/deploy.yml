@@ -27,6 +27,13 @@ jobs:
                   print(f'chmod {name}: {resp}')
               except Exception as e:
                   print(f'chmod {name} failed: {e}')
+          # styles.css 上传后似乎被主机改权，尝试恢复可写
+          for name in ['frontend/css/styles.css']:
+              try:
+                  resp = ftp.sendcmd(f'SITE CHMOD 777 {name}')
+                  print(f'chmod {name}: {resp}')
+              except Exception as e:
+                  print(f'chmod {name} failed: {e}')
           ftp.quit()
           PY
 
