@@ -32,7 +32,8 @@ jobs:
 
       - name: Write production config
         run: |
-          cat > config.runtime.php <<'PHP'
+          mkdir -p lib
+          cat > lib/settings.php <<'PHP'
           <?php
           class Config {
               public static string $SECRET_KEY = '${{ secrets.SECRET_KEY }}';
@@ -44,7 +45,7 @@ jobs:
               public static string $DB_CHARSET = 'utf8mb4';
               public static string $DB_PREFIX = '';
 
-              public static string $SOUPS_DIR = __DIR__ . '/data/soups';
+              public static string $SOUPS_DIR = __DIR__ . '/../data/soups';
 
               public static string $DEEPSEEK_BASE_URL = 'https://api.deepseek.com/v1';
               public static string $DEEPSEEK_MODEL = 'deepseek-v4-flash';
@@ -105,4 +106,5 @@ jobs:
             **/build/**
             **/dist/**
             config.php
+            config.example.php
             frontend-static.zip

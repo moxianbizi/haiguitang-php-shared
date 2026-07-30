@@ -5,7 +5,7 @@
  * 或通过 Web：tool.php?action=init&token=xxx（需配置 TOOL_TOKEN）
  */
 
-require_once __DIR__ . '/config.runtime.php';
+require_once __DIR__ . '/lib/settings.php';
 
 if (PHP_SAPI === 'cli') {
     $token = null;
