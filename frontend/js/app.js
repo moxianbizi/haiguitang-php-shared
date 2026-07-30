@@ -147,12 +147,122 @@ function stopPoll() {
 function route() {
   stopPoll();
   const hash = location.hash.replace(/^#/, "") || "/";
-  if (hash === "/" || hash === "/lobby") return renderLobby();
+  if (hash === "/") return renderHome();
+  if (hash === "/lobby") return renderLobby();
   if (hash === "/auth") return renderAuth();
   if (hash === "/create") return renderCreate();
   if (hash.startsWith("/room/")) return renderRoom(hash.slice("/room/".length).toUpperCase());
-  renderLobby();
+  renderHome();
 }
+
+// ---------- Home / Soup List ----------
+function renderHome() {
+  $("#app").innerHTML = `
+    <div class="page">
+      <header class="header">
+        <div class="logo" style="cursor:pointer" onclick="location.hash='#'">海龟汤馆 · 灵之残响</div>
+        <div class="header-actions" id="homeHeaderActions"></div>
+      </header>
+      <div class="lobby">
+        <div class="lobby-section" style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input id="soupSearch" placeholder="搜索标题或汤面…" style="flex:1;min-width:200px" />
+            <select id="soupSeason" style="min-width:120px">
+              <option value="">全部季</option>
+            </select>
+            <select id="soupSource" style="min-width:120px">
+              <option value="official">官方汤</option>
+              <option value="community">玩家汤</option>
+              <option value="all">全部</option>
+            </select>
+          </div>
+        </div>
+        <div class="lobby-section">
+          <h2>汤题列表</h2>
+          <div id="homeSoupList"><div class="card" style="color:var(--text-3)">加载中…</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+  renderHomeHeaderActions();
+  loadHomeSoups();
+  $("#soupSearch")?.addEventListener("input", loadHomeSoups);
+  $("#soupSeason")?.addEventListener("change", loadHomeSoups);
+  $("#soupSource")?.addEventListener("change", loadHomeSoups);
+}
+
+function renderHomeHeaderActions() {
+  const container = $("#homeHeaderActions");
+  if (!container) return;
+  if (store.user) {
+    container.innerHTML = `
+      <button class="btn-ghost" onclick="location.hash='#/lobby'">大厅</button>
+      <span style="color:var(--text-2);font-size:.85rem">${escapeHtml(store.user.username)}</span>
+      <button class="btn-ghost" onclick="logout()">退出</button>
+    `;
+  } else {
+    container.innerHTML = `
+      <button class="btn-ghost" onclick="location.hash='#/auth'">登录</button>
+      <button class="btn-primary" onclick="location.hash='#/auth'">注册</button>
+    `;
+  }
+}
+
+async function loadHomeSoups() {
+  const q = ($("#soupSearch")?.value || "").trim();
+  const season = $("#soupSeason")?.value || "";
+  const source = $("#soupSource")?.value || "official";
+  const qs = new URLSearchParams({ source });
+  if (q) qs.set("q", q);
+  if (season) qs.set("season", season);
+  const { ok, data } = await API.get(`/api/soups?${qs.toString()}`);
+  if (!ok) {
+    $("#homeSoupList").innerHTML = `<div class="card" style="color:var(--text-3)">汤题加载失败</div>`;
+    return;
+  }
+  store.soups = data.soups || [];
+  const seasonSel = $("#soupSeason");
+  if (seasonSel && data.seasons) {
+    const cur = seasonSel.value;
+    seasonSel.innerHTML = `<option value="">全部季</option>` +
+      data.seasons.map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join("");
+    seasonSel.value = cur;
+  }
+  renderHomeSoupList();
+}
+
+function renderHomeSoupList() {
+  const el = $("#homeSoupList");
+  if (!store.soups.length) {
+    el.innerHTML = `<div class="card" style="color:var(--text-3)">暂无汤题</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="soup-grid">` + store.soups.map((s) => `
+    <div class="soup-item" onclick="openSoupDetail(${s.id})">
+      <div class="card-title">${escapeHtml(s.title)}</div>
+      <div class="card-meta">${escapeHtml(s.season || "官方")}${s.episode ? " · " + escapeHtml(s.episode) : ""}${s.author_username ? " · by " + escapeHtml(s.author_username) : ""}</div>
+      <div style="margin-top:8px;color:var(--text-2);font-size:.85rem;line-height:1.4">${escapeHtml(s.excerpt || "")}</div>
+    </div>
+  `).join("") + `</div>`;
+}
+
+window.openSoupDetail = async (id) => {
+  const { ok, data } = await API.get(`/api/soups/${id}`);
+  if (!ok) { toast("加载失败", "err"); return; }
+  const createBtn = store.user
+    ? `<button class="btn-primary" style="margin-top:12px;width:100%" onclick="createRoomFromSoup(${id})">以此汤创建房间</button>`
+    : `<button class="btn-primary" style="margin-top:12px;width:100%" onclick="location.hash='#/auth'">登录后创建房间</button>`;
+  openModal(data.title || "汤题详情", `
+    <div style="margin-bottom:12px"><strong>季 / 集</strong>：${escapeHtml(data.season || "-")} ${data.episode ? "/ " + escapeHtml(data.episode) : ""}</div>
+    <div style="margin-bottom:12px"><strong>汤面</strong><div class="md-body" style="margin-top:4px">${renderMd(data.surface)}</div></div>
+    ${createBtn}
+  `);
+};
+
+window.createRoomFromSoup = (id) => {
+  store.selectedSoupId = id;
+  location.hash = "#/create";
+};
 
 // ---------- Auth ----------
 function renderAuth() {
@@ -258,7 +368,7 @@ async function renderLobby() {
   $("#app").innerHTML = `
     <div class="page">
       <header class="header">
-        <div class="logo">海龟汤馆</div>
+        <div class="logo" style="cursor:pointer" onclick="location.hash='#'">海龟汤馆</div>
         <div class="header-actions">
           <span style="color:var(--text-2);font-size:.85rem">${escapeHtml(store.user.username)}</span>
           <button class="btn-ghost" onclick="logout()">退出</button>
@@ -339,7 +449,10 @@ async function renderCreate() {
   const { ok, data } = await API.get("/api/soups");
   if (!ok) { toast("汤题加载失败", "err"); return; }
   store.soups = (data.soups || []).filter((s) => s.title && s.id);
-  if (store.soups.length) store.selectedSoupId = store.soups[0].id;
+  if (store.soups.length) {
+    const exists = store.soups.some((s) => s.id === store.selectedSoupId);
+    if (!exists) store.selectedSoupId = store.soups[0].id;
+  }
   renderSoupList();
   $("#soupSearch")?.addEventListener("input", renderSoupList);
 }

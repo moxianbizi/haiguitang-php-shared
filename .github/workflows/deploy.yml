@@ -115,3 +115,4 @@ jobs:
             config.php
             config.example.php
             frontend-static.zip
+            frontend/css/styles.css
