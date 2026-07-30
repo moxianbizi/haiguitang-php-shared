@@ -21,14 +21,7 @@ jobs:
           ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
           print('cwd:', ftp.pwd())
           # 主机默认文件被系统锁定，尝试给能被修改的文件加 777 以便覆盖
-          for name in ['index.php', '404.html']:
-              try:
-                  resp = ftp.sendcmd(f'SITE CHMOD 777 {name}')
-                  print(f'chmod {name}: {resp}')
-              except Exception as e:
-                  print(f'chmod {name} failed: {e}')
-          # styles.css 上传后似乎被主机改权，尝试恢复可写
-          for name in ['frontend/css/styles.css']:
+          for name in ['index.php', '404.html', 'frontend/index.html', 'frontend/js/app.js', 'frontend/css/styles.css']:
               try:
                   resp = ftp.sendcmd(f'SITE CHMOD 777 {name}')
                   print(f'chmod {name}: {resp}')
@@ -115,4 +108,3 @@ jobs:
             config.php
             config.example.php
             frontend-static.zip
-            frontend/css/styles.css
