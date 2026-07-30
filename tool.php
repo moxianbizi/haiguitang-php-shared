@@ -13,9 +13,6 @@ set_error_handler(function ($severity, $message, $file, $line) {
 
 require_once __DIR__ . '/config.php';
 
-if (PHP_VERSION_ID < 80000) {
-    require_once __DIR__ . '/lib/compat.php';
-}
 
 $__toolCookieLife = 30 * 86400;
 ini_set('session.cookie_httponly', 1);

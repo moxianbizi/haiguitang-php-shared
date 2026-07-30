@@ -29,9 +29,6 @@ require_once __DIR__ . '/config.php';
 
 ini_set('post_max_size', '10M');
 
-if (PHP_VERSION_ID < 80000) {
-    require_once __DIR__ . '/lib/compat.php';
-}
 
 // 先加载 db.php，后续环境检查需要 DB::driver() 判断数据库类型
 require_once __DIR__ . '/db.php';
@@ -136,7 +133,16 @@ if (!is_file($scriptFile)) {
 
 // 无 URL 重写支持（共享主机常见）：通过 index.php?r=/api/xxx 访问 API
 if (!str_starts_with($uri, '/api/') && isset($_GET['r']) && str_starts_with($_GET['r'], '/api/')) {
-    $uri = $_GET['r'];
+    $r = $_GET['r'];
+    // 某些客户端会把 query string 直接拼进 r 参数（如 index.php?r=/api/xxx?since=0）
+    // 这里把 r 中的 query string 解析回 $_GET，并剥离出纯路径
+    $qPos = strpos($r, '?');
+    if ($qPos !== false) {
+        parse_str(substr($r, $qPos + 1), $parsed);
+        if (is_array($parsed)) $_GET = array_merge($_GET, $parsed);
+        $r = substr($r, 0, $qPos);
+    }
+    $uri = $r;
 }
 
 // 调试（生产删除）
@@ -216,11 +222,6 @@ function route_api(string $path) {
         case 'rooms':
             require_once __DIR__ . '/api/rooms.php';
             handle_rooms($segments);
-            break;
-        case 'lzcxroom':
-            // 灵之残响专属房间（带状态机/角色分配/多轮上下文）
-            require_once __DIR__ . '/api/lzcxroom.php';
-            handle_lzcxroom($segments);
             break;
         case 'ai':
             require_once __DIR__ . '/api/ai.php';

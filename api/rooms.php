@@ -90,13 +90,12 @@ function rooms_init_state(int $soupId): array {
 
 /**
  * 从 extra/host_manual 文本中解析【关键节点】段
- * 与 lzcxroom.php 的解析逻辑一致，独立一份避免 require 依赖。
  */
 function rooms_parse_key_nodes(string $text): array {
-    $nodes = [];
-    if (preg_match('/【?关键节点】?\s*[：:]\s*\n([\s\S]*?)(?=\n【|\n关键节点|\n规则|\n任务|\n幻灵|\n残响|\n收容|\Z)/u', $text, $km)) {
-        $lines = explode("\n", $km[1]);
-        foreach ($lines as $line) {
+  $nodes = [];
+  if (preg_match('/【?关键节点】?\s*[：:]\s*\n([\s\S]*?)(?=\n【|\n关键节点|\n规则|\n任务|\Z)/u', $text, $km)) {
+    $lines = explode("\n", $km[1]);
+    foreach ($lines as $line) {
             $t = trim($line);
             if ($t === '') continue;
             $t = preg_replace('/^[*\-]?\s*\d+[.、)]\s*/u', '', $t);
