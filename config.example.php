@@ -1,45 +1,36 @@
 <?php
 /**
- * 海龟汤馆 · 共享主机专用配置
- * 仅支持 MySQL，不依赖 SQLite/Composer/框架
- * 部署时修改本文件即可
+ * 配置示例文件
+ * 复制/重命名为 config.php 后填入真实值
  */
 class Config {
-    /** 应用密钥（session/验证码签名），生产环境请务必固定 */
-    public static string $SECRET_KEY = '';
+    public static string $SECRET_KEY = 'your-random-secret-key-32bytes-hex';
 
-    /** MySQL 配置 */
     public static string $DB_HOST = 'localhost';
-    public static string $DB_NAME = '';
-    public static string $DB_USER = '';
-    public static string $DB_PASS = '';
+    public static string $DB_NAME = 'your_db_name';
+    public static string $DB_USER = 'your_db_user';
+    public static string $DB_PASS = 'your_db_password';
     public static string $DB_CHARSET = 'utf8mb4';
     public static string $DB_PREFIX = '';
 
-    /** 汤源目录（MD 文件） */
     public static string $SOUPS_DIR = __DIR__ . '/data/soups';
 
-    /** DeepSeek API 默认接入点（密钥由前端用户自填） */
     public static string $DEEPSEEK_BASE_URL = 'https://api.deepseek.com/v1';
     public static string $DEEPSEEK_MODEL = 'deepseek-v4-flash';
 
-    /** 邮件：默认 Resend HTTP API（走 443，共享主机最稳） */
     public static string $MAIL_PROVIDER = 'resend';
     public static string $RESEND_API_KEY = '';
     public static string $RESEND_FROM = '海龟汤馆 <onboarding@resend.dev>';
 
-    /** 功能开关 */
     public static bool $ALLOW_REGISTER = true;
     public static bool $ALLOW_SUBMIT = true;
 
-    /** 全局限制 */
-    public static int $SESSION_TIMEOUT = 2592000; // 30 天
-    public static int $CODE_TTL = 600;            // 验证码 10 分钟
-    public static int $RATE_LIMIT_AI_ASK = 10;    // 每分钟
+    public static int $SESSION_TIMEOUT = 2592000;
+    public static int $CODE_TTL = 600;
+    public static int $RATE_LIMIT_AI_ASK = 10;
     public static int $RATE_LIMIT_ROOM_CREATE = 5;
-    public static int $RATE_LIMIT_MSG_SEND = 30;  // 每房间每分钟
+    public static int $RATE_LIMIT_MSG_SEND = 30;
 
-    /** 后台/运维免登录 Token（留空则必须 session 登录） */
     public static string $ADMIN_API_TOKEN = '';
     public static string $TOOL_TOKEN = '';
 

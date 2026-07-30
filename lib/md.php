@@ -284,9 +284,8 @@ function parse_md(string $filename, string $content): array {
         $season  = $m2[1];
         $episode = $m2[2];
     }
-    if (!$season) {
-        if (str_contains($filename, '灵之残响')) $season = '灵之残响';
-        elseif (str_contains($filename, '规则怪谈')) $season = '规则怪谈';
+    if (!$season && str_contains($filename, '规则怪谈')) {
+        $season = '规则怪谈';
     }
 
     return [

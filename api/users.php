@@ -1,67 +1,52 @@
 <?php
-/** 用户主页 API：查指定用户的公开信息 + TA 的已审核汤 + 关注状态 */
+/** 用户资料 API */
 
-function handle_users(array $segments) {
+function handle_users(array $segments): void {
     $action = $segments[1] ?? '';
-    $id = (int)$action;
-    if ($id <= 0) json_error('Not Found', 404);
-
-    if ($_SERVER['REQUEST_METHOD'] === 'GET') users_profile($id);
-    else json_error('Method Not Allowed', 405);
+    match ($action) {
+        'profile' => users_profile(),
+        'update' => users_update(),
+        'password' => users_password(),
+        default => json_error('Not Found', 404),
+    };
 }
 
-function users_profile(int $id) {
-    $pdo = DB::pdo();
-    $stmt = $pdo->prepare('SELECT id, username, created_at, is_banned FROM users WHERE id = ?');
-    $stmt->execute([$id]);
-    $u = $stmt->fetch();
-    if (!$u) json_error('用户不存在', 404);
-    if ((int)$u['is_banned'] === 1) json_error('该用户已被封禁', 403);
-
-    // 统计
-    $stmt = $pdo->prepare('SELECT COUNT(*) FROM soups WHERE author_id = ? AND status = \'approved\'');
-    $stmt->execute([$id]);
-    $soupCount = (int)$stmt->fetchColumn();
-
-    $stmt = $pdo->prepare('SELECT COUNT(*) FROM follows WHERE follower_id = ?');
-    $stmt->execute([$id]);
-    $followingCount = (int)$stmt->fetchColumn();
-
-    $stmt = $pdo->prepare('SELECT COUNT(*) FROM follows WHERE following_id = ?');
-    $stmt->execute([$id]);
-    $followerCount = (int)$stmt->fetchColumn();
-
-    // TA 的已审核汤（自制汤广场里的）
-    $stmt = $pdo->prepare('SELECT id, filename, season, episode, title, surface, substr(surface, 1, 80) AS excerpt FROM soups WHERE author_id = ? AND status = \'approved\' ORDER BY sort_order, id');
-    $stmt->execute([$id]);
-    $soups = $stmt->fetchAll();
-
-    // 关注状态（当前登录用户是否关注了 TA）
-    $me = current_user();
-    $following = false;
-    $isMe = false;
-    if ($me) {
-        $isMe = (int)$me['id'] === $id;
-        if (!$isMe) {
-            $stmt = $pdo->prepare('SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?');
-            $stmt->execute([$me['id'], $id]);
-            $following = (bool)$stmt->fetch();
-        }
-    }
-
+function users_profile(): void {
+    $user = require_login();
     json_ok([
-        'user' => [
-            'id' => (int)$u['id'],
-            'username' => $u['username'],
-            'created_at' => $u['created_at'],
-        ],
-        'stats' => [
-            'soups' => $soupCount,
-            'following' => $followingCount,
-            'followers' => $followerCount,
-        ],
-        'soups' => $soups,
-        'following' => $following,
-        'is_me' => $isMe,
+        'id' => (int)$user['id'],
+        'username' => $user['username'],
+        'email' => $user['email'],
+        'is_admin' => (int)$user['is_admin'],
+        'created_at' => $user['created_at'],
     ]);
+}
+
+function users_update(): void {
+    $user = require_login();
+    $data = body_json();
+    $email = strtolower(trim((string)($data['email'] ?? '')));
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) json_error('邮箱格式不正确');
+
+    $pdo = DB::pdo();
+    $stmt = $pdo->prepare("SELECT id FROM " . DB::table('users') . " WHERE email = ? AND id != ?");
+    $stmt->execute([$email, $user['id']]);
+    if ($stmt->fetch()) json_error('邮箱已被使用', 409);
+
+    $pdo->prepare("UPDATE " . DB::table('users') . " SET email = ? WHERE id = ?")->execute([$email, $user['id']]);
+    json_ok(['msg' => '已更新']);
+}
+
+function users_password(): void {
+    $user = require_login();
+    $data = body_json();
+    $old = (string)($data['old_password'] ?? '');
+    $new = (string)($data['new_password'] ?? '');
+    if ($old === '' || $new === '') json_error('密码不能为空');
+    if (strlen($new) < 8) json_error('新密码至少 8 位');
+    if (!verify_password($old, $user['password_hash'])) json_error('原密码错误', 403);
+
+    DB::pdo()->prepare("UPDATE " . DB::table('users') . " SET password_hash = ? WHERE id = ?")
+        ->execute([hash_password($new), $user['id']]);
+    json_ok(['msg' => '密码已修改']);
 }
