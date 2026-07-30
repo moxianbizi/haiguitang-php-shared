@@ -97,4 +97,12 @@ jobs:
           protocol: ftp
           security: loose
           exclude: |
+            **/.git*/**
+            **/.github/**
+            **/node_modules/**
+            **/vendor/**
+            **/.env*
+            **/build/**
+            **/dist/**
             config.php
+            frontend-static.zip
