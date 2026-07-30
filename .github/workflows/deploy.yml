@@ -116,3 +116,4 @@ jobs:
             frontend/manifest.json
             frontend/sw.js
             frontend/soups-img/**
+            tool.php

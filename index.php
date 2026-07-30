@@ -154,7 +154,7 @@ function serve_static(string $uri): void {
     }
 
     if ($clean === '' || $clean === '/') {
-        readfile_or_404($frontend . '/index.html');
+        readfile_or_404($frontend . '/index.v2.html');
         return;
     }
 
@@ -172,8 +172,8 @@ function serve_static(string $uri): void {
         return;
     }
 
-    // 前端路由兜底：返回 index.html
-    readfile_or_404($frontend . '/index.html');
+    // 前端路由兜底：返回 index.v2.html
+    readfile_or_404($frontend . '/index.v2.html');
 }
 
 function readfile_or_404(string $path): void {
