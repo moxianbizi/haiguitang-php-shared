@@ -75,7 +75,15 @@ jobs:
           from ftplib import FTP
           ftp = FTP('${{ secrets.FTP_SERVER }}', timeout=30)
           ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
-          ftp.cwd('${{ secrets.FTP_REMOTE_DIR }}')
+          # 尝试进入远程目录；部分 FTP 只认相对路径
+          for d in ['${{ secrets.FTP_REMOTE_DIR }}'.lstrip('/').rstrip('/'), '.']:
+              try:
+                  if d:
+                      ftp.cwd(d)
+                  print('cwd:', ftp.pwd())
+                  break
+              except Exception as e:
+                  print('cwd try failed:', e)
           for name in ['config.php', 'index.html', 'index.php', '404.html']:
               backup = name + '.host-default'
               try:
