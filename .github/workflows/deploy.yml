@@ -111,3 +111,8 @@ jobs:
             frontend/index.html
             frontend/css/styles.css
             frontend/js/app.js
+            frontend/js/marked.min.js
+            frontend/js/purify.min.js
+            frontend/manifest.json
+            frontend/sw.js
+            frontend/soups-img/**
