@@ -12,9 +12,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare host root for overwrite
+        continue-on-error: true
+        run: |
+          python3 - <<'PY'
+          from ftplib import FTP
+          ftp = FTP('${{ secrets.FTP_SERVER }}', timeout=30)
+          ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
+          print('cwd:', ftp.pwd())
+          # 主机默认文件被系统锁定，尝试给能被修改的文件加 777 以便覆盖
+          for name in ['index.php', '404.html']:
+              try:
+                  resp = ftp.sendcmd(f'SITE CHMOD 777 {name}')
+                  print(f'chmod {name}: {resp}')
+              except Exception as e:
+                  print(f'chmod {name} failed: {e}')
+          ftp.quit()
+          PY
+
       - name: Write production config
         run: |
-          cat > config.php <<'PHP'
+          cat > config.runtime.php <<'PHP'
           <?php
           class Config {
               public static string $SECRET_KEY = '${{ secrets.SECRET_KEY }}';
@@ -68,23 +86,6 @@ jobs:
           Config::load();
           PHP
 
-      - name: Try chmod host default files
-        continue-on-error: true
-        run: |
-          python3 - <<'PY'
-          from ftplib import FTP
-          ftp = FTP('${{ secrets.FTP_SERVER }}', timeout=30)
-          ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
-          print('cwd:', ftp.pwd())
-          for name in ['config.php', 'index.html', 'index.php', '404.html']:
-              try:
-                  resp = ftp.sendcmd(f'SITE CHMOD 777 {name}')
-                  print(f'chmod {name}: {resp}')
-              except Exception as e:
-                  print(f'chmod {name} failed: {e}')
-          ftp.quit()
-          PY
-
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -95,3 +96,5 @@ jobs:
           server-dir: ${{ secrets.FTP_REMOTE_DIR }}
           protocol: ftp
           security: loose
+          exclude: |
+            config.php

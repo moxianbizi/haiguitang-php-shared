@@ -4,7 +4,7 @@
  * 支持 URL 重写（/api/xxx）和 query_string（index.php?r=/api/xxx）两种访问方式
  */
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/config.runtime.php';
 
 if (!extension_loaded('pdo_mysql')) {
     header('Content-Type: application/json; charset=utf-8');
