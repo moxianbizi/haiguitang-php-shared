@@ -117,3 +117,4 @@ jobs:
             frontend/sw.js
             frontend/soups-img/**
             tool.php
+            router.php
