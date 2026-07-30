@@ -68,33 +68,20 @@ jobs:
           Config::load();
           PHP
 
-      - name: Rename host default files
+      - name: Try chmod host default files
         continue-on-error: true
         run: |
           python3 - <<'PY'
           from ftplib import FTP
           ftp = FTP('${{ secrets.FTP_SERVER }}', timeout=30)
           ftp.login('${{ secrets.FTP_USERNAME }}', '${{ secrets.FTP_PASSWORD }}')
-          # 尝试进入远程目录；部分 FTP 只认相对路径
-          for d in ['${{ secrets.FTP_REMOTE_DIR }}'.lstrip('/').rstrip('/'), '.']:
-              try:
-                  if d:
-                      ftp.cwd(d)
-                  print('cwd:', ftp.pwd())
-                  break
-              except Exception as e:
-                  print('cwd try failed:', e)
+          print('cwd:', ftp.pwd())
           for name in ['config.php', 'index.html', 'index.php', '404.html']:
-              backup = name + '.host-default'
               try:
-                  try:
-                      ftp.delete(backup)
-                  except Exception:
-                      pass
-                  ftp.rename(name, backup)
-                  print(f'renamed {name} -> {backup}')
+                  resp = ftp.sendcmd(f'SITE CHMOD 777 {name}')
+                  print(f'chmod {name}: {resp}')
               except Exception as e:
-                  print(f'skip {name}: {e}')
+                  print(f'chmod {name} failed: {e}')
           ftp.quit()
           PY
 
